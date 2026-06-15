@@ -4,26 +4,45 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Calendar, Clock, ArrowRight, BookOpen } from 'lucide-react';
-import { db, WeeklyProgram } from '@/lib/db';
+import { db, WeeklyProgram, GalleryMedia } from '@/lib/db';
 import styles from './page.module.css';
+
+// Helper to generate a video thumbnail
+const getVideoThumbnail = (url: string): string => {
+  if (!url) return '';
+  if (url.includes('res.cloudinary.com')) {
+    const baseUrl = url.substring(0, url.lastIndexOf('.'));
+    return `${baseUrl}.jpg`;
+  }
+  if (url.startsWith('data:video/')) {
+    return 'https://images.unsplash.com/photo-1548625361-155deee223cb?auto=format&fit=crop&w=800&q=80';
+  }
+  return url;
+};
 
 export default function Home() {
   const [programs, setPrograms] = useState<WeeklyProgram[]>([]);
+  const [gallery, setGallery] = useState<GalleryMedia[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadPrograms() {
+    async function loadHomepageData() {
       try {
-        const data = await db.getWeeklyPrograms();
-        setPrograms(data);
+        const [programsData, galleryData] = await Promise.all([
+          db.getWeeklyPrograms(),
+          db.getGalleryMedia()
+        ]);
+        setPrograms(programsData);
+        setGallery(galleryData.slice(0, 4)); // Show up to 4 items
       } catch (err) {
-        console.error('Failed to load programs:', err);
+        console.error('Failed to load homepage data:', err);
       } finally {
         setLoading(false);
       }
     }
-    loadPrograms();
+    loadHomepageData();
   }, []);
+
 
   return (
     <div>
@@ -132,50 +151,27 @@ export default function Home() {
           <h2 className={styles.title}>Life at Olive Prayer House</h2>
         </div>
 
-        <div className={styles.teaserGrid}>
-          <div className={styles.teaserImg}>
-            <Image
-              src="https://images.unsplash.com/photo-1548625361-155deee223cb?auto=format&fit=crop&w=400&q=80"
-              alt="Sanctuary"
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 100vw, 25vw"
-            />
-            <div className={styles.teaserOverlay}>Sanctuary</div>
+        {gallery.length > 0 ? (
+          <div className={styles.teaserGrid}>
+            {gallery.map((item) => (
+              <div key={item.id} className={styles.teaserImg}>
+                <img
+                  src={item.type === 'video' ? getVideoThumbnail(item.url) : item.url}
+                  alt={item.caption || 'Fellowship Moment'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                  loading="lazy"
+                />
+                {item.caption && <div className={styles.teaserOverlay}>{item.caption}</div>}
+              </div>
+            ))}
           </div>
-          <div className={styles.teaserImg}>
-            <Image
-              src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=400&q=80"
-              alt="Prayer"
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 100vw, 25vw"
-            />
-            <div className={styles.teaserOverlay}>Prayer</div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-muted)' }}>
+            Photos and videos from our fellowships will appear here once published by the admin.
           </div>
-          <div className={styles.teaserImg}>
-            <Image
-              src="https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=400&q=80"
-              alt="Fellowship"
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 100vw, 25vw"
-            />
-            <div className={styles.teaserOverlay}>Fellowship</div>
-          </div>
-          <div className={styles.teaserImg}>
-            <Image
-              src="https://images.unsplash.com/photo-1445445290350-18a3b86e0b5b?auto=format&fit=crop&w=400&q=80"
-              alt="Holy Bible"
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 100vw, 25vw"
-            />
-            <div className={styles.teaserOverlay}>Scripture</div>
-          </div>
-        </div>
+        )}
 
-        <Link href="/gallery" className="btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <Link href="/gallery" className="btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '30px' }}>
           Explore Full Gallery <ArrowRight size={18} />
         </Link>
       </section>

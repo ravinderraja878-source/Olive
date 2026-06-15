@@ -56,40 +56,7 @@ const DEFAULT_WEEKLY_PROGRAMS: WeeklyProgram[] = [
   },
 ];
 
-const DEFAULT_GALLERY: GalleryMedia[] = [
-  {
-    id: 'g-1',
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1548625361-155deee223cb?auto=format&fit=crop&w=800&q=80',
-    public_id: 'mock_church_interior',
-    caption: 'Our main sanctuary filled with light.',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'g-2',
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=800&q=80',
-    public_id: 'mock_prayer',
-    caption: 'Gathered in unified prayer.',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'g-3',
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=800&q=80',
-    public_id: 'mock_olive_branch',
-    caption: 'The olive branch of peace and hope.',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'g-4',
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1445445290350-18a3b86e0b5b?auto=format&fit=crop&w=800&q=80',
-    public_id: 'mock_bible',
-    caption: 'His Word is a lamp unto our feet.',
-    created_at: new Date().toISOString(),
-  },
-];
+const DEFAULT_GALLERY: GalleryMedia[] = [];
 
 const DEFAULT_MESSAGES: ContactMessage[] = [
   {
