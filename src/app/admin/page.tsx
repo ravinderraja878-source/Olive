@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { 
   LogOut, Calendar, Image as ImageIcon, Mail, Plus, Trash2, 
   Edit2, Check, Eye, EyeOff, Upload, FileVideo, AlertCircle 
@@ -37,6 +36,8 @@ export default function AdminDashboard() {
   });
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [useDirectUrl, setUseDirectUrl] = useState(false);
+  const [directUrl, setDirectUrl] = useState('');
 
   // Messages State
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -144,6 +145,34 @@ export default function AdminDashboard() {
   // --- GALLERY ACTIONS ---
   const handleMediaUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (useDirectUrl) {
+      if (!directUrl.trim()) {
+        showFeedback('error', 'Please enter a valid media URL.');
+        return;
+      }
+      setUploading(true);
+      try {
+        await db.addGalleryMedia({
+          type: mediaForm.type,
+          url: directUrl.trim(),
+          public_id: `url_${Date.now()}`,
+          caption: mediaForm.caption,
+        });
+        showFeedback('success', 'Media link saved successfully!');
+        setDirectUrl('');
+        setMediaForm({ type: 'image', caption: '' });
+        const updated = await db.getGalleryMedia();
+        setMediaList(updated);
+      } catch (err) {
+        console.error('Failed to save URL:', err);
+        showFeedback('error', 'Failed to save media URL.');
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
+
     const file = fileInputRef.current?.files?.[0];
     if (!file) {
       showFeedback('error', 'Please select an image or video file to upload.');
@@ -186,7 +215,7 @@ export default function AdminDashboard() {
             public_id: `mock_${Date.now()}`,
             caption: mediaForm.caption,
           });
-          showFeedback('success', 'Credentials missing. Saved locally in mockup mode!');
+          showFeedback('error', 'Cloudinary is not configured. Saved only to local browser (NOT shared with public).');
           loadData();
         };
         reader.readAsDataURL(file);
@@ -208,6 +237,7 @@ export default function AdminDashboard() {
       setUploading(false);
     }
   };
+
 
   const handleDeleteMedia = async (id: string) => {
     if (!confirm('Are you sure you want to delete this media item?')) return;
@@ -444,22 +474,66 @@ export default function AdminDashboard() {
                 </select>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Select File *</label>
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  className={styles.input} 
-                  accept={mediaForm.type === 'image' ? 'image/*' : 'video/*'}
-                  required
-                />
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {mediaForm.type === 'image' 
-                    ? 'Recommended formats: JPEG, PNG, WEBP' 
-                    : 'Recommended format: MP4 (Cloudinary supports video encoding)'
-                  }
-                </span>
+              <div className={styles.formGroup} style={{ marginBottom: '15px' }}>
+                <label>Source Type</label>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '5px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'normal', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="sourceType" 
+                      checked={!useDirectUrl} 
+                      onChange={() => setUseDirectUrl(false)} 
+                    />
+                    Upload File
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'normal', cursor: 'pointer' }}>
+                    <input 
+                      type="radio" 
+                      name="sourceType" 
+                      checked={useDirectUrl} 
+                      onChange={() => setUseDirectUrl(true)} 
+                    />
+                    Provide Public URL
+                  </label>
+                </div>
               </div>
+
+              {!useDirectUrl ? (
+                <div className={styles.formGroup}>
+                  <label>Select File *</label>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    className={styles.input} 
+                    accept={mediaForm.type === 'image' ? 'image/*' : 'video/*'}
+                    required={!useDirectUrl}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    {mediaForm.type === 'image' 
+                      ? 'Recommended formats: JPEG, PNG, WEBP' 
+                      : 'Recommended format: MP4 (Cloudinary supports video encoding)'
+                    }
+                  </span>
+                </div>
+              ) : (
+                <div className={styles.formGroup}>
+                  <label>Public Media URL *</label>
+                  <input 
+                    type="url" 
+                    className={styles.input} 
+                    placeholder={mediaForm.type === 'image' 
+                      ? 'e.g. https://images.unsplash.com/photo-1548625361-155deee223cb'
+                      : 'e.g. https://www.w3schools.com/html/mov_bbb.mp4'
+                    }
+                    value={directUrl}
+                    onChange={(e) => setDirectUrl(e.target.value)}
+                    required={useDirectUrl}
+                  />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Provide a direct URL to a publicly hosted photo or video.
+                  </span>
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label>Caption / Title</label>
@@ -479,7 +553,7 @@ export default function AdminDashboard() {
                 disabled={uploading}
               >
                 <Upload size={18} />
-                <span>{uploading ? 'Uploading Asset...' : 'Upload Media'}</span>
+                <span>{uploading ? 'Processing Media...' : (useDirectUrl ? 'Save Media Link' : 'Upload Media')}</span>
               </button>
             </form>
             
@@ -511,16 +585,16 @@ export default function AdminDashboard() {
                         <span style={{ position: 'absolute', bottom: '8px', left: '8px', background: 'rgba(0,0,0,0.7)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.65rem', color: 'white' }}>Video</span>
                       </div>
                     ) : (
-                      <Image 
+                      <img 
                         src={item.url} 
                         alt={item.caption || 'Gallery thumbnail'} 
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        sizes="140px"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                        loading="lazy"
                       />
                     )}
                   </div>
                 ))
+
               ) : (
                 <div className={styles.noItems} style={{ gridColumn: '1 / -1' }}>No media uploaded yet.</div>
               )}

@@ -1,10 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Play, X, Image as ImageIcon, Film } from 'lucide-react';
 import { db, GalleryMedia } from '@/lib/db';
 import styles from './gallery.module.css';
+
+// Helper to generate a video thumbnail
+const getVideoThumbnail = (url: string): string => {
+  if (!url) return '';
+  if (url.includes('res.cloudinary.com')) {
+    // Cloudinary automatically generates video posters if you change the file extension to .jpg on a video resource
+    const baseUrl = url.substring(0, url.lastIndexOf('.'));
+    return `${baseUrl}.jpg`;
+  }
+  if (url.startsWith('data:video/')) {
+    // If it's local mock base64, return a default image placeholder
+    return 'https://images.unsplash.com/photo-1548625361-155deee223cb?auto=format&fit=crop&w=800&q=80';
+  }
+  return url;
+};
 
 export default function Gallery() {
   const [mediaList, setMediaList] = useState<GalleryMedia[]>([]);
@@ -85,16 +99,15 @@ export default function Gallery() {
                 </div>
               )}
               <div className={styles.imageContainer}>
-                {/* For videos we display a thumbnail placeholder, or use Cloudinary image generation, or cover image */}
-                <Image
+                {/* Standard img tag bypasses domain limits and uses dynamic Cloudinary video poster thumbs */}
+                <img
                   src={item.type === 'video' 
-                    ? 'https://images.unsplash.com/photo-1548625361-155deee223cb?auto=format&fit=crop&w=800&q=80' // default thumbnail for local mock video
+                    ? getVideoThumbnail(item.url)
                     : item.url
                   }
                   alt={item.caption || 'Olive Prayer House Gallery Media'}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                  loading="lazy"
                 />
                 <div className={styles.overlay}>
                   <span className={styles.mediaType}>
@@ -110,6 +123,7 @@ export default function Gallery() {
       ) : (
         <div className={styles.noMedia}>No photo or video assets found.</div>
       )}
+
 
       {/* Lightbox Modal */}
       <div
