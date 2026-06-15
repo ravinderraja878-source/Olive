@@ -9,11 +9,15 @@ export const auth = {
   async login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
     if (isSupabaseConfigured && supabase) {
       // 1. Try signing in with Supabase
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (!signInError) {
+      if (!signInError && data?.session) {
+        if (isBrowser()) {
+          localStorage.setItem('olive_admin_logged_in', 'true');
+          localStorage.setItem('olive_admin_email', email);
+        }
         return { success: true };
       }
 
@@ -27,11 +31,15 @@ export const auth = {
 
           if (!signUpError && signUpData.user) {
             // Try signing in again now that the user has been created
-            const { error: retryError } = await supabase.auth.signInWithPassword({
+            const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
               email,
               password,
             });
-            if (!retryError) {
+            if (!retryError && retryData?.session) {
+              if (isBrowser()) {
+                localStorage.setItem('olive_admin_logged_in', 'true');
+                localStorage.setItem('olive_admin_email', email);
+              }
               return { success: true };
             }
           }
@@ -48,7 +56,7 @@ export const auth = {
         return { success: true };
       }
 
-      return { success: false, error: signInError.message };
+      return { success: false, error: signInError?.message || 'Login failed.' };
     }
 
     // Mock Fallback Auth (when Supabase is not configured)
@@ -63,7 +71,6 @@ export const auth = {
     return { success: false, error: 'Invalid email or password' };
   },
 
-
   async logout(): Promise<void> {
     if (isSupabaseConfigured && supabase) {
       await supabase.auth.signOut();
@@ -77,7 +84,9 @@ export const auth = {
   async isLoggedIn(): Promise<boolean> {
     if (isSupabaseConfigured && supabase) {
       const { data } = await supabase.auth.getSession();
-      return !!data.session;
+      if (data?.session) {
+        return true;
+      }
     }
     if (isBrowser()) {
       return localStorage.getItem('olive_admin_logged_in') === 'true';
