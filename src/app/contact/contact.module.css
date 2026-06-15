@@ -1,0 +1,232 @@
+.contactSection {
+  padding: 80px 5%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.subtitle {
+  color: var(--accent-gold);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-family: var(--font-serif);
+  color: var(--primary-olive);
+}
+
+@media (prefers-color-scheme: dark) {
+  .title {
+    color: var(--text-light);
+  }
+}
+
+/* Layout Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 50px;
+  margin-bottom: 80px;
+}
+
+/* Sidebar Info Cards */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.infoCard {
+  padding: 30px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  border-left: 4px solid var(--accent-gold);
+}
+
+.iconWrapper {
+  background: rgba(27, 53, 34, 0.05);
+  color: var(--primary-light);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .iconWrapper {
+    background: rgba(207, 168, 59, 0.1);
+    color: var(--accent-gold);
+  }
+}
+
+.infoContent h3 {
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+  color: var(--primary-olive);
+}
+
+@media (prefers-color-scheme: dark) {
+  .infoContent h3 {
+    color: var(--text-light);
+  }
+}
+
+.infoContent p, .infoContent a {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.link:hover {
+  color: var(--accent-gold);
+}
+
+/* Contact Form Card */
+.formCard {
+  padding: 50px 40px;
+}
+
+.formTitle {
+  font-size: 1.8rem;
+  font-family: var(--font-serif);
+  margin-bottom: 10px;
+  color: var(--primary-olive);
+}
+
+@media (prefers-color-scheme: dark) {
+  .formTitle {
+    color: var(--text-light);
+  }
+}
+
+.formSubtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--border-light);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-main);
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+@media (prefers-color-scheme: dark) {
+  .input, .textarea {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}
+
+.input:focus, .textarea:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+.textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* Status Notifications */
+.successMessage {
+  padding: 15px;
+  background: rgba(40, 167, 69, 0.15);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  color: #1e7e34;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 20px;
+  font-weight: 500;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .successMessage {
+    color: #2fed5b;
+  }
+}
+
+.errorMessage {
+  padding: 15px;
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #bd2130;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 20px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Large Map Section */
+.mapSection {
+  margin-top: 50px;
+}
+
+.mapTitle {
+  font-size: 1.5rem;
+  font-family: var(--font-serif);
+  margin-bottom: 20px;
+  color: var(--primary-olive);
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mapTitle {
+    color: var(--text-light);
+  }
+}
+
+.mapWrapper {
+  width: 100%;
+  height: 450px;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 992px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .formCard {
+    padding: 30px 20px;
+  }
+  .mapWrapper {
+    height: 300px;
+  }
+}
