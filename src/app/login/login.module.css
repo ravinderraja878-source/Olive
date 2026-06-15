@@ -103,3 +103,67 @@
     padding: 35px 20px;
   }
 }
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.statusBadge.supabase {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+.statusBadge.demo {
+  background: rgba(243, 156, 18, 0.1);
+  color: #f39c12;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.tipMessage {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 10px 12px;
+  border-radius: 6px;
+  text-align: left;
+  line-height: 1.45;
+  border-left: 3px solid var(--accent-gold);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tipMessage {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.demoButton {
+  margin-top: 15px;
+  font-size: 0.85rem;
+  color: var(--accent-gold);
+  background: none;
+  border: 1px dashed var(--accent-gold);
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition-smooth);
+}
+
+.demoButton:hover {
+  background: rgba(207, 168, 59, 0.1);
+}
+
